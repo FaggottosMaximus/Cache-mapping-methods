@@ -49,7 +49,7 @@ def main():
     block_var.initialize('B')
     b_radio = tk.Radiobutton(master = window, text = "B", variable = block_var, value = "B")
     b_radio.place(x=430, y=150)
-
+#fsjfl;kesjfljsfjsefjsal
     window.mainloop()
 
 main()
