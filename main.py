@@ -29,7 +29,7 @@ def main():
     entry_list['binary address:'].config(width = 35)
 
     btn_step.place(x=x, y=480)
-    btn_calc.place(x=x,y=530)
+    btn_calc.place(x=x, y=530)
 
     mem_var = tk.StringVar()
     mem_var.initialize("kb")
@@ -49,7 +49,7 @@ def main():
     block_var.initialize('B')
     b_radio = tk.Radiobutton(master = window, text = "B", variable = block_var, value = "B")
     b_radio.place(x=430, y=150)
-#fsjfl;kesjfljsfjsefjsal
+    
     window.mainloop()
 
 main()
