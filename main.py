@@ -12,7 +12,8 @@ def hex_to_binary(hex, mem_size, kb_or_mb):
         size = math.log(mem_size * 1024, 2)
     else:
         size = math.log(mem_size * 1024 * 1024, 2)
-    return str(bin(int(hex[2:], 16))[2:].zfill(int(size)))
+    
+    return str(bin(int(hex[2:], 16))[2:].zfill(int(size)))[0:int(size)]
 
 def tag_index_offset(binary, block_size, cache_size, cache_kb_or_mb):
     full_length = len(binary)
@@ -32,8 +33,10 @@ def main():
         tag = binary[0:tag_index_offset_list[0]]
         index = binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]]
         offset = binary[tag_index_offset_list[0] + tag_index_offset_list[1]: tag_index_offset_list[0] + tag_index_offset_list[1] + tag_index_offset_list[2]]
-        print(binary,"\n",tag,index,offset)
-
+        binary_var = tk.StringVar()
+        binary_var.set(tag + " " + index + " " + offset)
+        entry_list['binary address:'].configure(textvariable = binary_var)
+    
     def cacl_pressed():
         pass
 
