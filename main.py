@@ -12,8 +12,8 @@ def hex_to_binary(hex, mem_size, kb_or_mb):
         size = math.log(mem_size * 1024, 2)
     else:
         size = math.log(mem_size * 1024 * 1024, 2)
-    
-    return str(bin(int(hex[2:], 16))[2:].zfill(int(size)))[0:int(size)]
+    binary = str(bin(int(hex[2:], 16))[2:].zfill(int(size)))[-int(size):]
+    return binary
 
 def tag_index_offset(binary, block_size, cache_size, cache_kb_or_mb):
     full_length = len(binary)
