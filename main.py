@@ -28,6 +28,8 @@ def tag_index_offset(binary, block_size, cache_size, cache_kb_or_mb):
 
 def main():
     index_tag_dict = {}
+    hits, misses=0, 0
+
     def step_pressed():
         binary = hex_to_binary(entry_list['hex address:'].get(), int(entry_list['memory size:'].get()), mem_var)
         tag_index_offset_list = tag_index_offset(binary, int(entry_list['block size:'].get()), int(entry_list['cache size:'].get()), cache_var.get())
@@ -37,29 +39,30 @@ def main():
         binary_var = tk.StringVar()
         binary_var.set(tag + " " + index + " " + offset)
         entry_list['binary address:'].configure(textvariable = binary_var)
-        
         if index in index_tag_dict:
             if index_tag_dict[index] == tag:
                 hit_or_miss = "Hit"
+                hits += 1
             else:
                 hit_or_miss = "Miss"
                 index_tag_dict[index] = tag
+                misses += 1
         else:
             hit_or_miss = "Miss"
             index_tag_dict[index] = tag
+            misses += 1
 
         hit_or_miss_var = tk.StringVar()
         hit_or_miss_var.set(hit_or_miss)
         entry_list['hit or miss:'].configure(textvariable = hit_or_miss_var)
         
-        
-    
     def cacl_pressed():
         pass
 
     def res_pressed():
-        nonlocal index_tag_dict 
+        nonlocal index_tag_dict, hits, misses
         index_tag_dict = {}
+        hits, misses = 0, 0
         for key in entry_list:
             var = tk.StringVar()
             var.set('')
@@ -70,10 +73,12 @@ def main():
     window.title("Direct mapping simulator")
     window.geometry("600x600")
     window.resizable(False, False)
+
     btn_calc = tk.Button(master = window, text = "calculate", command = None, highlightbackground='black', relief='raised')
     btn_step = tk.Button(master = window, text = 'step', command = step_pressed, highlightbackground='black', relief='raised')
     btn_res = tk.Button(master = window, text = "reset", command = res_pressed, highlightbackground='black', relief='raised')
-    labels_names = ['memory size:', 'cache size:', 'block size:', 'hex address:', 'cache access time:', 'cache miss penalty time:', 'binary address:', 'hit or miss:']
+    
+    labels_names = ['memory size:', 'cache size:', 'block size:', 'hex address:', 'cache miss penalty time:', 'cache access time:', 'hit or miss:', 'binary address:']
     entry_list = {}
     for i in labels_names:
         label = tk.Label(master=window, text=i, font=(None, 15))
@@ -82,8 +87,14 @@ def main():
         label.place(x=x,y=y)
         entry_list[i] = tk.Entry(master = window, width = 15)
         entry_list[i].place(x=x+260,y=y)
-        if i == 'cache access time:' or i == 'cache miss penalty time:' or i == 'binary address:' or i == 'hit or miss:':
+        if i == 'cache access time:' or i == 'binary address:' or i == 'hit or miss:':
             entry_list[i].config(state = 'disabled')
+        if i == 'cache miss penalty time:':
+            ns_label = tk.Label(master = window, text='ns', font=(None,15))
+            ns_label.place(x=430,y=y)
+            ns_label = tk.Label(master = window, text='ns', font=(None,15))
+            ns_label.place(x=430,y=y+60)
+
     entry_list['binary address:'].config(width = 35)
 
     btn_step.place(x=x, y=510)
@@ -109,8 +120,7 @@ def main():
     b_radio = tk.Radiobutton(master = window, text = "B", variable = block_var, value = "B")
     b_radio.place(x=430, y=150)
 
-    
-    
+    entry_list['memory size:'].focus()
     window.mainloop()
 
 main()
