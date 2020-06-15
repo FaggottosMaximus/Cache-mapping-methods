@@ -1,9 +1,6 @@
 import tkinter as tk 
 import math 
 
-def penalty_time():
-    pass
-
 def access_time():
     pass
 
