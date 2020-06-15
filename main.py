@@ -57,13 +57,22 @@ def main():
     def cacl_pressed():
         pass
 
+    def res_pressed():
+        nonlocal index_tag_dict 
+        index_tag_dict = {}
+        for key in entry_list:
+            var = tk.StringVar()
+            var.set('')
+            entry_list[key].configure(textvariable = var)
+        
+
     window = tk.Tk()
     window.title("Direct mapping simulator")
     window.geometry("600x600")
     window.resizable(False, False)
-    btn_calc = tk.Button(master = window, text = "calculate", command = None, highlightbackground='black')
-    btn_step = tk.Button(master = window, text = 'step', command = step_pressed, highlightbackground='black')
-   
+    btn_calc = tk.Button(master = window, text = "calculate", command = None, highlightbackground='black', relief='raised')
+    btn_step = tk.Button(master = window, text = 'step', command = step_pressed, highlightbackground='black', relief='raised')
+    btn_res = tk.Button(master = window, text = "reset", command = res_pressed, highlightbackground='black', relief='raised')
     labels_names = ['memory size:', 'cache size:', 'block size:', 'hex address:', 'cache access time:', 'cache miss penalty time:', 'binary address:', 'hit or miss:']
     entry_list = {}
     for i in labels_names:
@@ -78,7 +87,8 @@ def main():
     entry_list['binary address:'].config(width = 35)
 
     btn_step.place(x=x, y=510)
-    btn_calc.place(x=x, y=560)
+    btn_calc.place(x=x+70, y=510)
+    btn_res.place(x=x+170, y=510)
 
     mem_var = tk.StringVar()
     mem_var.initialize("kb")
@@ -98,6 +108,8 @@ def main():
     block_var.initialize('B')
     b_radio = tk.Radiobutton(master = window, text = "B", variable = block_var, value = "B")
     b_radio.place(x=430, y=150)
+
+    
     
     window.mainloop()
 
