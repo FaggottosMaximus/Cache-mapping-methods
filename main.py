@@ -1,8 +1,8 @@
 import tkinter as tk 
 import math 
 
-def access_time():
-    pass
+def avg_access_time(cache_time, penalty_time, hit_rate):
+    return cache_time+hit_rate*(penalty_time)
 
 def hex_to_binary(hex, mem_size, kb_or_mb):
     if kb_or_mb == 'kb':
@@ -28,33 +28,43 @@ def main():
     hits, misses=0, 0
 
     def step_pressed():
-        binary = hex_to_binary(entry_list['hex address:'].get(), int(entry_list['memory size:'].get()), mem_var)
-        tag_index_offset_list = tag_index_offset(binary, int(entry_list['block size:'].get()), int(entry_list['cache size:'].get()), cache_var.get())
-        tag = binary[0:tag_index_offset_list[0]]
-        index = binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]]
-        offset = binary[tag_index_offset_list[0] + tag_index_offset_list[1]: tag_index_offset_list[0] + tag_index_offset_list[1] + tag_index_offset_list[2]]
-        binary_var = tk.StringVar()
-        binary_var.set(tag + " " + index + " " + offset)
-        entry_list['binary address:'].configure(textvariable = binary_var)
-        if index in index_tag_dict:
-            if index_tag_dict[index] == tag:
-                hit_or_miss = "Hit"
-                hits += 1
+        try:
+            binary = hex_to_binary(entry_list['hex address:'].get(), int(entry_list['memory size:'].get()), mem_var)
+            tag_index_offset_list = tag_index_offset(binary, int(entry_list['block size:'].get()), int(entry_list['cache size:'].get()), cache_var.get())
+            tag = binary[0:tag_index_offset_list[0]]
+            index = binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]]
+            offset = binary[tag_index_offset_list[0] + tag_index_offset_list[1]: tag_index_offset_list[0] + tag_index_offset_list[1] + tag_index_offset_list[2]]
+            binary_var = tk.StringVar()
+            binary_var.set(tag + " " + index + " " + offset)
+            entry_list['binary address:'].configure(textvariable = binary_var)
+            nonlocal hits,misses
+            if index in index_tag_dict:
+                if index_tag_dict[index] == tag:
+                    hit_or_miss = "Hit"
+                    hits += 1
+                else:
+                    hit_or_miss = "Miss"
+                    index_tag_dict[index] = tag
+                    misses += 1
             else:
                 hit_or_miss = "Miss"
                 index_tag_dict[index] = tag
                 misses += 1
-        else:
-            hit_or_miss = "Miss"
-            index_tag_dict[index] = tag
-            misses += 1
 
-        hit_or_miss_var = tk.StringVar()
-        hit_or_miss_var.set(hit_or_miss)
-        entry_list['hit or miss:'].configure(textvariable = hit_or_miss_var)
+            hit_or_miss_var = tk.StringVar()
+            hit_or_miss_var.set(hit_or_miss)
+            entry_list['hit or miss:'].configure(textvariable = hit_or_miss_var)
+        except :
+            pass #to be done
         
     def cacl_pressed():
-        pass
+        try:    
+            access_time = avg_access_time(float(entry_list['cache access time:'].get()),float(entry_list['cache miss penalty time:'].get()),float(hits/(misses+hits)))
+            time_var = tk.StringVar()
+            time_var.set(access_time)
+            entry_list['average access time:'].configure(textvariable = time_var)
+        except:
+            pass #to be done
 
     def res_pressed():
         nonlocal index_tag_dict, hits, misses
@@ -68,14 +78,14 @@ def main():
 
     window = tk.Tk()
     window.title("Direct mapping simulator")
-    window.geometry("600x600")
+    window.geometry("600x660")
     window.resizable(False, False)
 
-    btn_calc = tk.Button(master = window, text = "calculate", command = None, highlightbackground='black', relief='raised')
+    btn_calc = tk.Button(master = window, text = "calculate", command = cacl_pressed, highlightbackground='black', relief='raised')
     btn_step = tk.Button(master = window, text = 'step', command = step_pressed, highlightbackground='black', relief='raised')
     btn_res = tk.Button(master = window, text = "reset", command = res_pressed, highlightbackground='black', relief='raised')
     
-    labels_names = ['memory size:', 'cache size:', 'block size:', 'hex address:', 'cache miss penalty time:', 'cache access time:', 'hit or miss:', 'binary address:']
+    labels_names = ['memory size:', 'cache size:', 'block size:', 'hex address:', 'cache miss penalty time:', 'cache access time:', 'hit or miss:', 'average access time:', 'binary address:']
     entry_list = {}
     for i in labels_names:
         label = tk.Label(master=window, text=i, font=(None, 15))
@@ -84,7 +94,7 @@ def main():
         label.place(x=x,y=y)
         entry_list[i] = tk.Entry(master = window, width = 15)
         entry_list[i].place(x=x+260,y=y)
-        if i == 'cache access time:' or i == 'binary address:' or i == 'hit or miss:':
+        if i == 'binary address:' or i == 'hit or miss:' or i == 'average access time:':
             entry_list[i].config(state = 'disabled')
         if i == 'cache miss penalty time:':
             ns_label = tk.Label(master = window, text='ns', font=(None,15))
@@ -94,9 +104,9 @@ def main():
 
     entry_list['binary address:'].config(width = 35)
 
-    btn_step.place(x=x, y=510)
-    btn_calc.place(x=x+70, y=510)
-    btn_res.place(x=x+170, y=510)
+    btn_step.place(x=x, y=570)
+    btn_calc.place(x=x+70, y=570)
+    btn_res.place(x=x+170, y=570)
 
     mem_var = tk.StringVar()
     mem_var.initialize("kb")
