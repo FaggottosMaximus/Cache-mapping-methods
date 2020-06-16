@@ -2,7 +2,7 @@ import tkinter as tk
 import math 
 
 def avg_access_time(cache_time, penalty_time, hit_rate):
-    return cache_time+hit_rate*(penalty_time)
+    return cache_time+(1-hit_rate)*(penalty_time)
 
 def hex_to_binary(hex, mem_size, kb_or_mb):
     if kb_or_mb == 'kb':
