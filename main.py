@@ -78,19 +78,19 @@ def main():
 
     window = tk.Tk()
     window.title("Direct mapping simulator")
-    window.geometry("600x660")
+    window.geometry("600x750")
     window.resizable(False, False)
 
     btn_calc = tk.Button(master = window, text = "calculate", command = cacl_pressed, highlightbackground='black', relief='raised')
     btn_step = tk.Button(master = window, text = 'step', command = step_pressed, highlightbackground='black', relief='raised')
     btn_res = tk.Button(master = window, text = "reset", command = res_pressed, highlightbackground='black', relief='raised')
     
-    labels_names = ['memory size:', 'cache size:', 'block size:', 'hex address:', 'cache miss penalty time:', 'cache access time:', 'hit or miss:', 'average access time:', 'binary address:']
+    labels_names = ['number of ways:', 'memory size:', 'cache size:', 'block size:', 'hex address:', 'cache miss penalty time:', 'cache access time:', 'hit or miss:', 'average access time:', 'binary address:']
     entry_list = {}
     for i in labels_names:
         label = tk.Label(master=window, text=i, font=(None, 15))
         x = 15
-        y = 60*labels_names.index(i)+30
+        y = 60*labels_names.index(i)+100
         label.place(x=x,y=y)
         entry_list[i] = tk.Entry(master = window, width = 15)
         entry_list[i].place(x=x+260,y=y)
@@ -104,28 +104,40 @@ def main():
 
     entry_list['binary address:'].config(width = 35)
 
-    btn_step.place(x=x, y=570)
-    btn_calc.place(x=x+70, y=570)
-    btn_res.place(x=x+170, y=570)
+    btn_step.place(x=x, y=690)
+    btn_calc.place(x=x+70, y=690)
+    btn_res.place(x=x+170, y=690)
 
     mem_var = tk.StringVar()
     mem_var.initialize("kb")
     mg_radio = tk.Radiobutton(master = window, text = "MB", variable = mem_var, value = 'mb')
     kb_radio = tk.Radiobutton(master = window, text = "KB", variable = mem_var, value = 'kb')
-    mg_radio.place(x=500,y=30)
-    kb_radio.place(x=430,y=30)
+    mg_radio.place(x=500,y=100)
+    kb_radio.place(x=430,y=100)
 
     cache_var = tk.StringVar()
     cache_var.initialize('kb')
     mg_radio = tk.Radiobutton(master = window, text = "MB", variable = cache_var, value = 'mb')
     kb_radio = tk.Radiobutton(master = window, text = "KB", variable = cache_var, value = 'kb')
-    mg_radio.place(x=500,y=90)
-    kb_radio.place(x=430,y=90)
+    mg_radio.place(x=500,y=160)
+    kb_radio.place(x=430,y=160)
 
     block_var = tk.StringVar()
     block_var.initialize('B')
     b_radio = tk.Radiobutton(master = window, text = "B", variable = block_var, value = "B")
-    b_radio.place(x=430, y=150)
+    b_radio.place(x=430, y=220)
+
+    method_var = tk.StringVar()
+    method_var.initialize('direct')
+    direct_radio = tk.Radiobutton(master = window, text = 'direct', variable = method_var, value = 'direct')
+    fa_radio = tk.Radiobutton(master = window, text = 'fully associative', variable = method_var, value = 'fa')
+    sa_radio = tk.Radiobutton(master = window, text = 'semi associative', variable = method_var, value = 'sa')
+    direct_radio.place(x=200,y=40)
+    fa_radio.place(x=300,y=40)
+    sa_radio.place(x=400, y=40)
+    label = tk.Label(master = window, text = 'method:', font=(None, 15))
+    label.place(x=15,y=40)
+
 
     entry_list['memory size:'].focus()
     window.mainloop()
