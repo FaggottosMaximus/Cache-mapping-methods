@@ -34,7 +34,6 @@ def main():
 
     def step_pressed():
         try:
-            print(method)
             binary = hex_to_binary(entry_list['hex address:'].get(), int(entry_list['memory size:'].get()), mem_var)
             tag_index_offset_list = tag_index_offset(binary, int(entry_list['block size:'].get()), int(entry_list['cache size:'].get()), cache_var.get())
             tag = binary[0:tag_index_offset_list[0]]
@@ -44,7 +43,8 @@ def main():
             binary_var.set(tag + " " + index + " " + offset)
             entry_list['binary address:'].configure(textvariable = binary_var)
             nonlocal hits,misses
-
+            fa_index = 0
+            
             if method == 'direct':
                 if index in index_tag_dict:
                     if index_tag_dict[index] == tag:
@@ -60,7 +60,27 @@ def main():
                     misses += 1
 
             if method == 'fa':
-                pass
+                tag = tag+index
+                if tag in index_tag_dict.values():
+                    for key in index_tag_dict.keys():
+                        if index_tag_dict[key] == tag:
+                            index_tag_dict.pop(key)
+                            break
+                    index_tag_dict[fa_index] = tag
+                    hit_or_miss = "Hit"
+                    hits += 1
+                else:
+                    if len(index_tag_dict) == 2 ** index  :
+                        index_tag_dict.pop(min(index_tag_dict.keys()))
+                        index_tag_dict[fa_index] = tag
+                        fa_index += 1
+                        misses += 1
+                        hit_or_miss = "Miss"
+                    else:
+                        hit_or_miss = "Miss"
+                        misses += 1
+                        index_tag_dict[fa_index] = tag
+                        fa_index += 1    
 
             if method == 'sa':
                 pass   
