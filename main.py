@@ -26,9 +26,15 @@ def tag_index_offset(binary, block_size, cache_size, cache_kb_or_mb):
 def main():
     index_tag_dict = {}
     hits, misses=0, 0
+    method = ''
+    
+    def method_choice():
+      nonlocal method 
+      method = method_var.get()  
 
     def step_pressed():
         try:
+            print(method)
             binary = hex_to_binary(entry_list['hex address:'].get(), int(entry_list['memory size:'].get()), mem_var)
             tag_index_offset_list = tag_index_offset(binary, int(entry_list['block size:'].get()), int(entry_list['cache size:'].get()), cache_var.get())
             tag = binary[0:tag_index_offset_list[0]]
@@ -38,18 +44,26 @@ def main():
             binary_var.set(tag + " " + index + " " + offset)
             entry_list['binary address:'].configure(textvariable = binary_var)
             nonlocal hits,misses
-            if index in index_tag_dict:
-                if index_tag_dict[index] == tag:
-                    hit_or_miss = "Hit"
-                    hits += 1
+
+            if method == 'direct':
+                if index in index_tag_dict:
+                    if index_tag_dict[index] == tag:
+                        hit_or_miss = "Hit"
+                        hits += 1
+                    else:
+                        hit_or_miss = "Miss"
+                        index_tag_dict[index] = tag
+                        misses += 1
                 else:
                     hit_or_miss = "Miss"
                     index_tag_dict[index] = tag
                     misses += 1
-            else:
-                hit_or_miss = "Miss"
-                index_tag_dict[index] = tag
-                misses += 1
+
+            if method == 'fa':
+                pass
+
+            if method == 'sa':
+                pass   
 
             hit_or_miss_var = tk.StringVar()
             hit_or_miss_var.set(hit_or_miss)
@@ -74,7 +88,7 @@ def main():
             var = tk.StringVar()
             var.set('')
             entry_list[key].configure(textvariable = var)
-        
+        direct_radio.invoke()
 
     window = tk.Tk()
     window.title("Direct mapping simulator")
@@ -126,19 +140,18 @@ def main():
     block_var.initialize('B')
     b_radio = tk.Radiobutton(master = window, text = "B", variable = block_var, value = "B")
     b_radio.place(x=430, y=220)
-
     method_var = tk.StringVar()
     method_var.initialize('direct')
-    direct_radio = tk.Radiobutton(master = window, text = 'direct', variable = method_var, value = 'direct')
-    fa_radio = tk.Radiobutton(master = window, text = 'fully associative', variable = method_var, value = 'fa')
-    sa_radio = tk.Radiobutton(master = window, text = 'semi associative', variable = method_var, value = 'sa')
+    direct_radio = tk.Radiobutton(master = window, text = 'direct', variable = method_var, value = 'direct', command = method_choice)
+    fa_radio = tk.Radiobutton(master = window, text = 'fully associative', variable = method_var, value = 'fa', command = method_choice)
+    sa_radio = tk.Radiobutton(master = window, text = 'semi associative', variable = method_var, value = 'sa', command = method_choice)
     direct_radio.place(x=200,y=40)
     fa_radio.place(x=300,y=40)
     sa_radio.place(x=400, y=40)
     label = tk.Label(master = window, text = 'method:', font=(None, 15))
     label.place(x=15,y=40)
-
-
+    
+    direct_radio.invoke()
     entry_list['memory size:'].focus()
     window.mainloop()
 
