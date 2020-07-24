@@ -12,7 +12,7 @@ def hex_to_binary(hex, mem_size, kb_or_mb):
     binary = str(bin(int(hex[2:], 16))[2:].zfill(int(size)))[-int(size):]
     return binary
 
-def tag_index_offset(binary, block_size, cache_size, cache_kb_or_mb):
+def tag_index_offset_direct(binary, block_size, cache_size, cache_kb_or_mb):
     full_length = len(binary)
     if cache_kb_or_mb == 'kb':
         cache_size = cache_size * 1024
@@ -22,6 +22,18 @@ def tag_index_offset(binary, block_size, cache_size, cache_kb_or_mb):
     index_length = math.log(cache_size/block_size, 2)
     tag_length = full_length - (offset_length + index_length)
     return [int(tag_length), int(index_length), int(offset_length)]
+
+def tag_index_offset_sa(binary, block_size, cache_size, cache_kb_or_mb, number_of_ways):
+    full_length = len(binary)
+    if cache_kb_or_mb == 'kb':
+        cache_size = cache_size * 1024
+    else:
+        cache_size = cache_size * 1024 * 1024
+    offset_length = math.log(block_size, 2)
+    index_length = math.log((cache_size/block_size)/number_of_ways, 2)
+    tag_length = full_length - (offset_length + index_length)
+    return [int(tag_length), int(index_length), int(offset_length)]
+
 
 def main():
     index_tag_dict = {}
@@ -35,7 +47,7 @@ def main():
     def step_pressed():
         try:
             binary = hex_to_binary(entry_list['hex address:'].get(), int(entry_list['memory size:'].get()), mem_var)
-            tag_index_offset_list = tag_index_offset(binary, int(entry_list['block size:'].get()), int(entry_list['cache size:'].get()), cache_var.get())
+            tag_index_offset_list = tag_index_offset_direct(binary, int(entry_list['block size:'].get()), int(entry_list['cache size:'].get()), cache_var.get())
             tag = binary[0:tag_index_offset_list[0]]
             index = binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]]
             offset = binary[tag_index_offset_list[0] + tag_index_offset_list[1]: tag_index_offset_list[0] + tag_index_offset_list[1] + tag_index_offset_list[2]]
@@ -43,8 +55,10 @@ def main():
             binary_var.set(tag + " " + index + " " + offset)
             entry_list['binary address:'].configure(textvariable = binary_var)
             nonlocal hits,misses
-            fa_index = 0
-            
+            fa_index = 0      
+            number_of_sets = (entry_list['cache size:']/entry_list['block size:'])/entry_list['number of ways:']     
+            sets = [{} for i in range(number_of_sets)]
+
             if method == 'direct':
                 if index in index_tag_dict:
                     if index_tag_dict[index] == tag:
@@ -83,7 +97,30 @@ def main():
                         fa_index += 1    
 
             if method == 'sa':
-                pass   
+                tag_index_offset_list = tag_index_offset_sa(binary, int(entry_list['block size:'].get()), int(entry_list['cache size:'].get()), cache_var.get(), int(entry_list['number of ways:'].get()))
+                tag = binary[0:tag_index_offset_list[0]]
+                index = binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]]
+                offset = binary[tag_index_offset_list[0] + tag_index_offset_list[1]: tag_index_offset_list[0] + tag_index_offset_list[1] + tag_index_offset_list[2]]
+                if tag in sets[index].values():
+                    for key in sets[index].keys():
+                        if tag == sets[index][key]:
+                            sets[index].pop(key)
+                            break
+                    sets[index][fa_index] = tag
+                    hit_or_miss = "Hit"
+                    hits += 1
+                else:
+                    if len(sets[index]) == 2 ** index:
+                        sets[index].pop(min(sets[index].keys()))
+                        sets[index][fa_index] = tag
+                        fa_index += 1
+                        misses += 1
+                        hit_or_miss = "Miss"
+                    else:
+                        hit_or_miss = "Miss"
+                        misses += 1
+                        sets[index][fa_index] = tag
+                        fa_index += 1 
 
             hit_or_miss_var = tk.StringVar()
             hit_or_miss_var.set(hit_or_miss)
