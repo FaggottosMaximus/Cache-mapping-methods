@@ -46,13 +46,11 @@ def main():
         print(method)
         if method_var.get() != 'sa':
             try:
-                print('yes')
                 entry_list['number of ways:'].config(state = 'disabled')
             except:
                 pass
         else:
             try:
-                print('no')
                 entry_list['number of ways:'].config(state = 'normal')
             except:
                 pass
