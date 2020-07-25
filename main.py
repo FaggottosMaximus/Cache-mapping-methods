@@ -41,8 +41,21 @@ def main():
     method = ''
     
     def method_choice():
-      nonlocal method 
-      method = method_var.get()  
+        nonlocal method 
+        method = method_var.get()
+        print(method)
+        if method_var.get() != 'sa':
+            try:
+                print('yes')
+                entry_list['number of ways:'].config(state = 'disabled')
+            except:
+                pass
+        else:
+            try:
+                print('no')
+                entry_list['number of ways:'].config(state = 'normal')
+            except:
+                pass
 
     def step_pressed():
         try:
@@ -148,7 +161,7 @@ def main():
         direct_radio.invoke()
 
     window = tk.Tk()
-    window.title("Direct mapping simulator")
+    window.title("Cache mapping simulator")
     window.geometry("600x750")
     window.resizable(False, False)
 
@@ -156,7 +169,7 @@ def main():
     btn_step = tk.Button(master = window, text = 'step', command = step_pressed, highlightbackground='black', relief='raised')
     btn_res = tk.Button(master = window, text = "reset", command = res_pressed, highlightbackground='black', relief='raised')
     
-    labels_names = ['number of ways:', 'memory size:', 'cache size:', 'block size:', 'hex address:', 'cache miss penalty time:', 'cache access time:', 'hit or miss:', 'average access time:', 'binary address:']
+    labels_names = ['memory size:', 'cache size:', 'block size:', 'number of ways:', 'hex address:', 'cache miss penalty time:', 'cache access time:', 'hit or miss:', 'average access time:', 'binary address:']
     entry_list = {}
     for i in labels_names:
         label = tk.Label(master=window, text=i, font=(None, 15))
@@ -202,8 +215,8 @@ def main():
     direct_radio = tk.Radiobutton(master = window, text = 'direct', variable = method_var, value = 'direct', command = method_choice)
     fa_radio = tk.Radiobutton(master = window, text = 'fully associative', variable = method_var, value = 'fa', command = method_choice)
     sa_radio = tk.Radiobutton(master = window, text = 'semi associative', variable = method_var, value = 'sa', command = method_choice)
-    direct_radio.place(x=200,y=40)
-    fa_radio.place(x=300,y=40)
+    direct_radio.place(x=150,y=40)
+    fa_radio.place(x=250,y=40)
     sa_radio.place(x=400, y=40)
     label = tk.Label(master = window, text = 'method:', font=(None, 15))
     label.place(x=15,y=40)
