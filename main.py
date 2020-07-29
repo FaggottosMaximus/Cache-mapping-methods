@@ -66,7 +66,7 @@ def main():
         nonlocal hits,misses
         fa_index = 0
         if method == 'sa':
-            number_of_sets = (int(entry_list['cache size:'].get()) / int(entry_list['block size:'].get())) / int(entry_list['number of ways:'].get())    
+            number_of_sets = int((int(entry_list['cache size:'].get()) / int(entry_list['block size:'].get())) / int(entry_list['number of ways:'].get()))    
             sets = [{} for i in range(number_of_sets)]
         if method == 'direct':
             if index in index_tag_dict:
@@ -109,28 +109,29 @@ def main():
         if method == 'sa':
             tag_index_offset_list = tag_index_offset_sa(binary, int(entry_list['block size:'].get()), int(entry_list['cache size:'].get()), cache_var.get(), int(entry_list['number of ways:'].get()))
             tag = binary[0:tag_index_offset_list[0]]
-            index = binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]]
+            index = int(binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]])
             offset = binary[tag_index_offset_list[0] + tag_index_offset_list[1]: tag_index_offset_list[0] + tag_index_offset_list[1] + tag_index_offset_list[2]]
-            if tag in sets[index].values():
-                for key in sets[index].keys():
-                    if tag == sets[index][key]:
-                        sets[index].pop(key)
-                        break
-                sets[index][fa_index] = tag
-                hit_or_miss = "Hit"
-                hits += 1
-            else:
-                if len(sets[index]) == 2 ** index:
-                    sets[index].pop(min(sets[index].keys()))
+            if index<=len(sets):
+                if tag in sets[index].values():
+                    for key in sets[index].keys():
+                        if tag == sets[index][key]:
+                            sets[index].pop(key)
+                            break
                     sets[index][fa_index] = tag
-                    fa_index += 1
-                    misses += 1
-                    hit_or_miss = "Miss"
+                    hit_or_miss = "Hit"
+                    hits += 1
                 else:
-                    hit_or_miss = "Miss"
-                    misses += 1
-                    sets[index][fa_index] = tag
-                    fa_index += 1 
+                    if len(sets[index]) == 2 ** index:
+                        sets[index].pop(min(sets[index].keys()))
+                        sets[index][fa_index] = tag
+                        fa_index += 1
+                        misses += 1
+                        hit_or_miss = "Miss"
+                    else:
+                        hit_or_miss = "Miss"
+                        misses += 1
+                        sets[index][fa_index] = tag
+                        fa_index += 1 
 
         hit_or_miss_var = tk.StringVar()
         hit_or_miss_var.set(hit_or_miss)
