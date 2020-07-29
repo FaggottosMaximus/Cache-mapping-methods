@@ -1,6 +1,5 @@
 import tkinter as tk 
 import math 
-
 def avg_access_time(cache_time, penalty_time, hit_rate):
     return cache_time+(1-hit_rate)*(penalty_time)
 
@@ -39,7 +38,10 @@ def main():
     index_tag_dict = {}
     hits, misses=0, 0
     method = ''
-    
+    times = 0 
+    number_of_sets= None
+    sets= None
+    fa_index = 0
     def method_choice():
         nonlocal method 
         method = method_var.get()
@@ -60,14 +62,19 @@ def main():
         tag = binary[0:tag_index_offset_list[0]]
         index = binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]]
         offset = binary[tag_index_offset_list[0] + tag_index_offset_list[1]: tag_index_offset_list[0] + tag_index_offset_list[1] + tag_index_offset_list[2]]
-        binary_var = tk.StringVar()
-        binary_var.set(tag + " " + index + " " + offset)
-        entry_list['binary address:'].configure(textvariable = binary_var)
-        nonlocal hits,misses
-        fa_index = 0
-        if method == 'sa':
-            number_of_sets = int((int(entry_list['cache size:'].get()) / int(entry_list['block size:'].get())) / int(entry_list['number of ways:'].get()))    
+        nonlocal hits,misses,times,number_of_sets,sets,fa_index
+        
+        if method == 'sa' and times == 0:
+            cache_size = int(entry_list['cache size:'].get())
+            if cache_var.get() == 'kb':
+                cache_size = cache_size * 1024
+            else:
+                cache_size = cache_size * 1024 * 1024
+            number_of_sets = int(( cache_size / int(entry_list['block size:'].get())) / int(entry_list['number of ways:'].get()))    
             sets = [{} for i in range(number_of_sets)]
+            times+=1
+            print(number_of_sets)
+        
         if method == 'direct':
             if index in index_tag_dict:
                 if index_tag_dict[index] == tag:
@@ -81,7 +88,9 @@ def main():
                 hit_or_miss = "Miss"
                 index_tag_dict[index] = tag
                 misses += 1
-            print(hits,misses)
+            binary_var = tk.StringVar()
+            binary_var.set(tag + " " + index + " " + offset)
+            entry_list['binary address:'].configure(textvariable = binary_var)
 
         if method == 'fa':
             tag = tag+index
@@ -94,7 +103,7 @@ def main():
                 hit_or_miss = "Hit"
                 hits += 1
             else:
-                if len(index_tag_dict) == 2 ** int(index)  :
+                if len(index_tag_dict) == 2 ** len(index)  :
                     index_tag_dict.pop(min(index_tag_dict.keys()))
                     index_tag_dict[fa_index] = tag
                     fa_index += 1
@@ -104,35 +113,42 @@ def main():
                     hit_or_miss = "Miss"
                     misses += 1
                     index_tag_dict[fa_index] = tag
-                    fa_index += 1    
+                    fa_index += 1
+            binary_var = tk.StringVar()
+            binary_var.set(tag + " " + offset)  
+            entry_list['binary address:'].configure(textvariable = binary_var)  
 
         if method == 'sa':
             tag_index_offset_list = tag_index_offset_sa(binary, int(entry_list['block size:'].get()), int(entry_list['cache size:'].get()), cache_var.get(), int(entry_list['number of ways:'].get()))
             tag = binary[0:tag_index_offset_list[0]]
-            index = int(binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]])
+            index = binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]]
             offset = binary[tag_index_offset_list[0] + tag_index_offset_list[1]: tag_index_offset_list[0] + tag_index_offset_list[1] + tag_index_offset_list[2]]
-            if index<=len(sets):
-                if tag in sets[index].values():
-                    for key in sets[index].keys():
-                        if tag == sets[index][key]:
-                            sets[index].pop(key)
-                            break
-                    sets[index][fa_index] = tag
-                    hit_or_miss = "Hit"
-                    hits += 1
+            indexa = int(str(index),2)
+            if tag in sets[indexa].values():
+                for key in sets[indexa].keys():
+                    if tag == sets[indexa][key]:
+                        sets[indexa].pop(key)
+                        break
+                sets[indexa][fa_index] = tag
+                hit_or_miss = "Hit"
+                hits += 1
+            else:
+                if len(sets[indexa]) == entry_list['number of ways:'].get():
+                    sets[indexa].pop(min(sets[indexa].keys()))
+                    sets[indexa][fa_index] = tag
+                    fa_index += 1
+                    misses += 1
+                    hit_or_miss = "Miss"
                 else:
-                    if len(sets[index]) == 2 ** index:
-                        sets[index].pop(min(sets[index].keys()))
-                        sets[index][fa_index] = tag
-                        fa_index += 1
-                        misses += 1
-                        hit_or_miss = "Miss"
-                    else:
-                        hit_or_miss = "Miss"
-                        misses += 1
-                        sets[index][fa_index] = tag
-                        fa_index += 1 
-
+                    hit_or_miss = "Miss"
+                    misses += 1
+                    sets[indexa][fa_index] = tag
+                    fa_index += 1 
+            binary_var = tk.StringVar()
+            binary_var.set(tag + " " + index + " " + offset)
+            entry_list['binary address:'].configure(textvariable = binary_var)
+        
+        
         hit_or_miss_var = tk.StringVar()
         hit_or_miss_var.set(hit_or_miss)
         entry_list['hit or miss:'].configure(textvariable = hit_or_miss_var)
@@ -147,9 +163,13 @@ def main():
             pass #to be done
 
     def res_pressed():
-        nonlocal index_tag_dict, hits, misses
+        nonlocal index_tag_dict, hits, misses,times,number_of_sets,sets,fa_index
         index_tag_dict = {}
         hits, misses = 0, 0
+        times =0
+        sets = None
+        number_of_sets = None
+        fa_index=0
         for key in entry_list:
             var = tk.StringVar()
             var.set('')
