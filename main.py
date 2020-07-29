@@ -42,6 +42,7 @@ def main():
     number_of_sets= None
     sets= None
     fa_index = 0
+    sa_index = []
     def method_choice():
         nonlocal method 
         method = method_var.get()
@@ -62,7 +63,7 @@ def main():
         tag = binary[0:tag_index_offset_list[0]]
         index = binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]]
         offset = binary[tag_index_offset_list[0] + tag_index_offset_list[1]: tag_index_offset_list[0] + tag_index_offset_list[1] + tag_index_offset_list[2]]
-        nonlocal hits,misses,times,number_of_sets,sets,fa_index
+        nonlocal hits,misses,times,number_of_sets,sets,fa_index,sa_index
         
         if method == 'sa' and times == 0:
             cache_size = int(entry_list['cache size:'].get())
@@ -73,7 +74,7 @@ def main():
             number_of_sets = int(( cache_size / int(entry_list['block size:'].get())) / int(entry_list['number of ways:'].get()))    
             sets = [{} for i in range(number_of_sets)]
             times+=1
-            print(number_of_sets)
+            sa_index = [0 for i in range(number_of_sets)]
         
         if method == 'direct':
             if index in index_tag_dict:
@@ -131,22 +132,22 @@ def main():
                     if tag == sets[indexa][key]:
                         sets[indexa].pop(key)
                         break
-                sets[indexa][fa_index] = tag
+                sets[indexa][sa_index[indexa]] = tag
                 hit_or_miss = "Hit"
-                fa_index+=1
+                sa_index[indexa]+=1
                 hits += 1
             else:
                 if len(sets[indexa]) == entry_list['number of ways:'].get():
                     sets[indexa].pop(min(sets[indexa].keys()))
-                    sets[indexa][fa_index] = tag
-                    fa_index += 1
+                    sets[indexa][sa_index[indexa]] = tag
+                    sa_index[indexa] += 1
                     misses += 1
                     hit_or_miss = "Miss"
                 else:
                     hit_or_miss = "Miss"
                     misses += 1
-                    sets[indexa][fa_index] = tag
-                    fa_index += 1
+                    sets[indexa][sa_index[indexa]] = tag
+                    sa_index[indexa] += 1
                      
             binary_var = tk.StringVar()
             binary_var.set(tag + " " + index + " " + offset)
@@ -167,13 +168,14 @@ def main():
             pass #to be done
 
     def res_pressed():
-        nonlocal index_tag_dict, hits, misses,times,number_of_sets,sets,fa_index
+        nonlocal index_tag_dict, hits, misses,times,number_of_sets,sets,fa_index,sa_index
         index_tag_dict = {}
         hits, misses = 0, 0
         times =0
         sets = None
         number_of_sets = None
         fa_index=0
+        sa_index = 0
         for key in entry_list:
             var = tk.StringVar()
             var.set('')
