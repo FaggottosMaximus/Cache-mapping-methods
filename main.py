@@ -100,6 +100,7 @@ def main():
                         index_tag_dict.pop(key)
                         break
                 index_tag_dict[fa_index] = tag
+                fa_index+=1
                 hit_or_miss = "Hit"
                 hits += 1
             else:
@@ -114,6 +115,7 @@ def main():
                     misses += 1
                     index_tag_dict[fa_index] = tag
                     fa_index += 1
+                    
             binary_var = tk.StringVar()
             binary_var.set(tag + " " + offset)  
             entry_list['binary address:'].configure(textvariable = binary_var)  
@@ -131,6 +133,7 @@ def main():
                         break
                 sets[indexa][fa_index] = tag
                 hit_or_miss = "Hit"
+                fa_index+=1
                 hits += 1
             else:
                 if len(sets[indexa]) == entry_list['number of ways:'].get():
@@ -143,7 +146,8 @@ def main():
                     hit_or_miss = "Miss"
                     misses += 1
                     sets[indexa][fa_index] = tag
-                    fa_index += 1 
+                    fa_index += 1
+                     
             binary_var = tk.StringVar()
             binary_var.set(tag + " " + index + " " + offset)
             entry_list['binary address:'].configure(textvariable = binary_var)
