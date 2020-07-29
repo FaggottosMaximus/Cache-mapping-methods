@@ -43,7 +43,6 @@ def main():
     def method_choice():
         nonlocal method 
         method = method_var.get()
-        print(method)
         if method_var.get() != 'sa':
             try:
                 entry_list['number of ways:'].config(state = 'disabled')
@@ -56,88 +55,86 @@ def main():
                 pass
 
     def step_pressed():
-        try:
-            binary = hex_to_binary(entry_list['hex address:'].get(), int(entry_list['memory size:'].get()), mem_var)
-            tag_index_offset_list = tag_index_offset_direct(binary, int(entry_list['block size:'].get()), int(entry_list['cache size:'].get()), cache_var.get())
-            tag = binary[0:tag_index_offset_list[0]]
-            index = binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]]
-            offset = binary[tag_index_offset_list[0] + tag_index_offset_list[1]: tag_index_offset_list[0] + tag_index_offset_list[1] + tag_index_offset_list[2]]
-            binary_var = tk.StringVar()
-            binary_var.set(tag + " " + index + " " + offset)
-            entry_list['binary address:'].configure(textvariable = binary_var)
-            nonlocal hits,misses
-            fa_index = 0      
-            number_of_sets = (entry_list['cache size:']/entry_list['block size:'])/entry_list['number of ways:']     
+        binary = hex_to_binary(entry_list['hex address:'].get(), int(entry_list['memory size:'].get()), mem_var)
+        tag_index_offset_list = tag_index_offset_direct(binary, int(entry_list['block size:'].get()), int(entry_list['cache size:'].get()), cache_var.get())
+        tag = binary[0:tag_index_offset_list[0]]
+        index = binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]]
+        offset = binary[tag_index_offset_list[0] + tag_index_offset_list[1]: tag_index_offset_list[0] + tag_index_offset_list[1] + tag_index_offset_list[2]]
+        binary_var = tk.StringVar()
+        binary_var.set(tag + " " + index + " " + offset)
+        entry_list['binary address:'].configure(textvariable = binary_var)
+        nonlocal hits,misses
+        fa_index = 0
+        if method == 'sa':
+            number_of_sets = (int(entry_list['cache size:'].get()) / int(entry_list['block size:'].get())) / int(entry_list['number of ways:'].get())    
             sets = [{} for i in range(number_of_sets)]
-
-            if method == 'direct':
-                if index in index_tag_dict:
-                    if index_tag_dict[index] == tag:
-                        hit_or_miss = "Hit"
-                        hits += 1
-                    else:
-                        hit_or_miss = "Miss"
-                        index_tag_dict[index] = tag
-                        misses += 1
+        if method == 'direct':
+            if index in index_tag_dict:
+                if index_tag_dict[index] == tag:
+                    hit_or_miss = "Hit"
+                    hits += 1
                 else:
                     hit_or_miss = "Miss"
                     index_tag_dict[index] = tag
                     misses += 1
+            else:
+                hit_or_miss = "Miss"
+                index_tag_dict[index] = tag
+                misses += 1
+            print(hits,misses)
 
-            if method == 'fa':
-                tag = tag+index
-                if tag in index_tag_dict.values():
-                    for key in index_tag_dict.keys():
-                        if index_tag_dict[key] == tag:
-                            index_tag_dict.pop(key)
-                            break
+        if method == 'fa':
+            tag = tag+index
+            if tag in index_tag_dict.values():
+                for key in index_tag_dict.keys():
+                    if index_tag_dict[key] == tag:
+                        index_tag_dict.pop(key)
+                        break
+                index_tag_dict[fa_index] = tag
+                hit_or_miss = "Hit"
+                hits += 1
+            else:
+                if len(index_tag_dict) == 2 ** int(index)  :
+                    index_tag_dict.pop(min(index_tag_dict.keys()))
                     index_tag_dict[fa_index] = tag
-                    hit_or_miss = "Hit"
-                    hits += 1
+                    fa_index += 1
+                    misses += 1
+                    hit_or_miss = "Miss"
                 else:
-                    if len(index_tag_dict) == 2 ** index  :
-                        index_tag_dict.pop(min(index_tag_dict.keys()))
-                        index_tag_dict[fa_index] = tag
-                        fa_index += 1
-                        misses += 1
-                        hit_or_miss = "Miss"
-                    else:
-                        hit_or_miss = "Miss"
-                        misses += 1
-                        index_tag_dict[fa_index] = tag
-                        fa_index += 1    
+                    hit_or_miss = "Miss"
+                    misses += 1
+                    index_tag_dict[fa_index] = tag
+                    fa_index += 1    
 
-            if method == 'sa':
-                tag_index_offset_list = tag_index_offset_sa(binary, int(entry_list['block size:'].get()), int(entry_list['cache size:'].get()), cache_var.get(), int(entry_list['number of ways:'].get()))
-                tag = binary[0:tag_index_offset_list[0]]
-                index = binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]]
-                offset = binary[tag_index_offset_list[0] + tag_index_offset_list[1]: tag_index_offset_list[0] + tag_index_offset_list[1] + tag_index_offset_list[2]]
-                if tag in sets[index].values():
-                    for key in sets[index].keys():
-                        if tag == sets[index][key]:
-                            sets[index].pop(key)
-                            break
+        if method == 'sa':
+            tag_index_offset_list = tag_index_offset_sa(binary, int(entry_list['block size:'].get()), int(entry_list['cache size:'].get()), cache_var.get(), int(entry_list['number of ways:'].get()))
+            tag = binary[0:tag_index_offset_list[0]]
+            index = binary[tag_index_offset_list[0]:tag_index_offset_list[0] + tag_index_offset_list[1]]
+            offset = binary[tag_index_offset_list[0] + tag_index_offset_list[1]: tag_index_offset_list[0] + tag_index_offset_list[1] + tag_index_offset_list[2]]
+            if tag in sets[index].values():
+                for key in sets[index].keys():
+                    if tag == sets[index][key]:
+                        sets[index].pop(key)
+                        break
+                sets[index][fa_index] = tag
+                hit_or_miss = "Hit"
+                hits += 1
+            else:
+                if len(sets[index]) == 2 ** index:
+                    sets[index].pop(min(sets[index].keys()))
                     sets[index][fa_index] = tag
-                    hit_or_miss = "Hit"
-                    hits += 1
+                    fa_index += 1
+                    misses += 1
+                    hit_or_miss = "Miss"
                 else:
-                    if len(sets[index]) == 2 ** index:
-                        sets[index].pop(min(sets[index].keys()))
-                        sets[index][fa_index] = tag
-                        fa_index += 1
-                        misses += 1
-                        hit_or_miss = "Miss"
-                    else:
-                        hit_or_miss = "Miss"
-                        misses += 1
-                        sets[index][fa_index] = tag
-                        fa_index += 1 
+                    hit_or_miss = "Miss"
+                    misses += 1
+                    sets[index][fa_index] = tag
+                    fa_index += 1 
 
-            hit_or_miss_var = tk.StringVar()
-            hit_or_miss_var.set(hit_or_miss)
-            entry_list['hit or miss:'].configure(textvariable = hit_or_miss_var)
-        except :
-            pass #to be done
+        hit_or_miss_var = tk.StringVar()
+        hit_or_miss_var.set(hit_or_miss)
+        entry_list['hit or miss:'].configure(textvariable = hit_or_miss_var)
         
     def cacl_pressed():
         try:    
